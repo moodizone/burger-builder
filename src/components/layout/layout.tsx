@@ -1,7 +1,6 @@
 import React, {FunctionComponent} from 'react';
 
 import {Aux} from "../../hoc";
-import './layout.module.scss'
 
 const Layout: FunctionComponent = (props) => {
     return (
