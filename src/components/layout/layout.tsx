@@ -1,13 +1,16 @@
 import React, {FunctionComponent} from 'react';
 
-import {Aux} from "../../hoc";
+import Aux from '../../hoc/auxiliary/auxiliary'
+import BurgerBuilder from "../../containers/burger-builder/burger-builder";
+
 
 const Layout: FunctionComponent = (props) => {
     return (
         <Aux>
             <div>Toolbar , side drawer, backdrop</div>
-            <p>paragraph goes here !!!</p>
-            <main>{props.children}</main>
+            <main>
+                <BurgerBuilder/>
+            </main>
         </Aux>
     );
 };
