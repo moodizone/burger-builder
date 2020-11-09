@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 
+//always above App component to load styles with lower priority
+import './styles/app.scss';
 import App from "./containers/app/App";
 
 

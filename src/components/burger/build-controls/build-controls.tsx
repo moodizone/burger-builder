@@ -12,17 +12,26 @@ const controls: { type: BurgerIngredientModel, label: string }[] = [
 ];
 
 type propsType = {
+    disabled: { [key in BurgerIngredientModel]?: number }
     addIngredient: (type: BurgerIngredientModel) => void;
+    removeIngredients: (type: BurgerIngredientModel) => void;
+    totalPrice: number,
+    purchasable: boolean,
 }
 const BuildControls: FunctionComponent<propsType> = (props) => {
     return (
+
         <div className={styles.BuildControls}>
+            <p>Total price:{props.totalPrice.toFixed(2)}</p>
             {controls.map(item =>
                 <BuildControl
+                    disable={props.disabled[item.type]! < 1}
                     key={item.label}
                     label={item.label}
                     onAdd={() => props.addIngredient(item.type)}
+                    oRemove={() => props.removeIngredients(item.type)}
                 />)}
+            <button disabled={!props.purchasable} className={styles.OrderButton}>ORDER NOW</button>
         </div>
     );
 };
