@@ -1,4 +1,4 @@
-import {PropsWithChildren} from "react";
+import {FunctionComponent, PropsWithChildren} from "react";
 
-const Aux = (props: PropsWithChildren<any>) => props.children;
+const Aux:FunctionComponent = (props: PropsWithChildren<any>) => props.children;
 export default Aux;
