@@ -1,6 +1,7 @@
 import React, {FunctionComponent} from 'react';
 import Aux from "../../../hoc/auxiliary/auxiliary";
 import {BurgerIngredientModel} from "../burger-ingredient/burger-ingredient.model";
+import Button from "../../UI/button/button";
 
 type propsType = {
   ingredients: { [key in BurgerIngredientModel]?: number }
@@ -17,6 +18,8 @@ const OrderSummary: FunctionComponent<propsType> = (props) => {
         {list}
       </ul>
       <p>Continue to checkout?</p>
+      <Button type={'success'}>Confirm</Button>
+      <Button type={'danger'}>Cancel</Button>
     </Aux>
   );
 };

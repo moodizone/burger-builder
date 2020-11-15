@@ -1,0 +1,44 @@
+//==============================
+// Buttons
+//==============================
+.Button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  outline: none;
+  cursor: pointer;
+  font: inherit;
+  padding: 10px;
+  margin: 10px;
+  font-weight: bold;
+
+  &.success {
+    background: seagreen;
+  }
+
+  &.danger {
+    background: indianred;
+  }
+
+  &.warning {
+    background: darkorange;
+  }
+
+  &.primary {
+    background: royalblue;
+  }
+
+  &.secondary {
+    background: darkgray;
+  }
+
+  &.important {
+    background: purple;
+  }
+
+}
+
+.Button:first-of-type {
+  margin-left: 0;
+}
+
