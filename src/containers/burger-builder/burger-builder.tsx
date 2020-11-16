@@ -57,7 +57,11 @@ class BurgerBuilder extends Component<{}, stateTypes> {
         <Modal
           hide={this.onCancelPurchasing}
           show={this.state.purchasing}>
-          <OrderSummary ingredients={this.state.ingredients}/>
+          <OrderSummary
+            totalPrice={this.state.totalPrice}
+            onCancel={this.onCancelPurchasing}
+            onContinue={this.onContinuePurchase}
+            ingredients={this.state.ingredients}/>
         </Modal>
         <Burger ingredients={this.state.ingredients}/>
         <BuildControls
@@ -107,6 +111,10 @@ class BurgerBuilder extends Component<{}, stateTypes> {
 
   onCancelPurchasing = () => {
     this.setState({purchasing: false});
+  }
+
+  onContinuePurchase = () => {
+    alert('you continue!!!');
   }
 
   updatePurchase(ingredients: { [key in BurgerIngredientModel]: number }) {

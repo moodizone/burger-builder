@@ -4,6 +4,9 @@ import {BurgerIngredientModel} from "../burger-ingredient/burger-ingredient.mode
 import Button from "../../UI/button/button";
 
 type propsType = {
+  onCancel: () => void,
+  onContinue: () => void,
+  totalPrice: number,
   ingredients: { [key in BurgerIngredientModel]?: number }
 }
 const OrderSummary: FunctionComponent<propsType> = (props) => {
@@ -14,12 +17,11 @@ const OrderSummary: FunctionComponent<propsType> = (props) => {
     <Aux>
       <h3>Your Order</h3>
       <p>A delicious burger with the following ingredients:</p>
-      <ul>
-        {list}
-      </ul>
+      <ul>{list}</ul>
       <p>Continue to checkout?</p>
-      <Button type={'success'}>Confirm</Button>
-      <Button type={'danger'}>Cancel</Button>
+      <p><strong>Total price:{props.totalPrice.toFixed(2)}</strong></p>
+      <Button clicked={props.onContinue} type={'success'}>Confirm</Button>
+      <Button clicked={props.onCancel} type={'danger'}>Cancel</Button>
     </Aux>
   );
 };
