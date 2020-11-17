@@ -1,0 +1,5 @@
+@import "src/styles/variables";
+
+.Content {
+  margin-top: #{16px + $header_height};
+}
