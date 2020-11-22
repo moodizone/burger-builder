@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from 'react';
 import styles from './build-controls.module.scss';
 import BuildControl from "./build-control/build-control";
-import {BurgerIngredientModel} from "../burger-ingredient/burger-ingredient.model";
+import BurgerIngredientModel from "../../../models/burger-ingredient.model";
 
 //list of controls that present in build-control section
 const controls: { type: BurgerIngredientModel, label: string }[] = [

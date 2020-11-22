@@ -1,10 +1,14 @@
 import React, {Component} from 'react';
+import axios from '../../axios';
+
 import Aux from '../../hoc/auxiliary/auxiliary';
 import Burger from "../../components/burger/burger";
-import {BurgerIngredientModel} from "../../components/burger/burger-ingredient/burger-ingredient.model";
+import BurgerIngredientModel from "../../models/burger-ingredient.model";
 import BuildControls from "../../components/burger/build-controls/build-controls";
 import Modal from "../../components/UI/modal/modal";
 import OrderSummary from "../../components/burger/order-summary/order-summary";
+import OrderModel from "../../models/order.model";
+import Spinner from "../../components/UI/spinner/spinner";
 
 type stateTypes = {
 
@@ -19,6 +23,9 @@ type stateTypes = {
 
   //flag for controlling modal
   purchasing: boolean,
+
+  //loading for post order summary to firebase
+  postLoading: boolean,
 
 };
 
@@ -45,23 +52,27 @@ class BurgerBuilder extends Component<{}, stateTypes> {
     totalPrice: 10,
     purchasable: false,
     purchasing: false,
+    postLoading: false,
   }
 
   //==============================
   // Hooks
   //==============================
   render() {
+    let order_summary = this.state.postLoading ?
+      <Spinner/> :
+      <OrderSummary
+        totalPrice={this.state.totalPrice}
+        onCancel={this.onCancelPurchasing}
+        onContinue={this.onContinuePurchase}
+        ingredients={this.state.ingredients}/>
 
     return (
       <Aux>
         <Modal
           hide={this.onCancelPurchasing}
           show={this.state.purchasing}>
-          <OrderSummary
-            totalPrice={this.state.totalPrice}
-            onCancel={this.onCancelPurchasing}
-            onContinue={this.onContinuePurchase}
-            ingredients={this.state.ingredients}/>
+          {order_summary}
         </Modal>
         <Burger ingredients={this.state.ingredients}/>
         <BuildControls
@@ -114,7 +125,28 @@ class BurgerBuilder extends Component<{}, stateTypes> {
   }
 
   onContinuePurchase = () => {
-    alert('you continue!!!');
+    this.setState({postLoading: true});
+    const order: OrderModel = {
+      deliveryMethod: 'fastest',
+      price: this.state.totalPrice,
+      ingredients: this.state.ingredients,
+      customer: {
+        name: 'moodi',
+        email: 'moodi@moodi.com',
+        address: {
+          country: 'Iran',
+        }
+      }
+    }
+
+    axios.post<OrderModel>('/order.json', order)
+      .then(response => {
+        console.log(response);
+        this.setState({postLoading: false});
+      }, (errors) => {
+        console.log(errors);
+        this.setState({postLoading: false});
+      });
   }
 
   updatePurchase(ingredients: { [key in BurgerIngredientModel]: number }) {

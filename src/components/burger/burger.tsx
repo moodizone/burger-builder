@@ -2,7 +2,7 @@ import React, {FunctionComponent} from 'react';
 
 import styles from './burger.module.scss';
 import BurgerIngredient from "./burger-ingredient/burger-ingredient";
-import {BurgerIngredientModel} from "./burger-ingredient/burger-ingredient.model";
+import BurgerIngredientModel from "../../models/burger-ingredient.model";
 
 type propsType = { ingredients: { [key in BurgerIngredientModel]?: number } };
 

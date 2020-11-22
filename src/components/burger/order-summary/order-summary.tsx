@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from 'react';
 import Aux from "../../../hoc/auxiliary/auxiliary";
-import {BurgerIngredientModel} from "../burger-ingredient/burger-ingredient.model";
+import BurgerIngredientModel from "../../../models/burger-ingredient.model";
 import Button from "../../UI/button/button";
 
 type propsType = {

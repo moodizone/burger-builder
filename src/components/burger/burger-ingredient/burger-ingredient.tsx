@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from 'react';
 
-import {BurgerIngredientModel} from "./burger-ingredient.model";
+import BurgerIngredientModel from "../../../models/burger-ingredient.model";
 import styles from './burger-ingredient.module.scss';
 
 type propsType = {
