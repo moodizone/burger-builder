@@ -9,6 +9,7 @@ import Modal from "../../components/UI/modal/modal";
 import OrderSummary from "../../components/burger/order-summary/order-summary";
 import OrderModel from "../../models/order.model";
 import Spinner from "../../components/UI/spinner/spinner";
+import WithErrorHandler from "../../hoc/with-error-handler/with-error-handler";
 
 type stateTypes = {
 
@@ -86,7 +87,6 @@ class BurgerBuilder extends Component<{}, stateTypes> {
     );
   }
 
-
   //==============================
   // Handlers
   //==============================
@@ -125,7 +125,6 @@ class BurgerBuilder extends Component<{}, stateTypes> {
   }
 
   onContinuePurchase = () => {
-    this.setState({postLoading: true});
     const order: OrderModel = {
       deliveryMethod: 'fastest',
       price: this.state.totalPrice,
@@ -138,13 +137,11 @@ class BurgerBuilder extends Component<{}, stateTypes> {
         }
       }
     }
-
+    this.setState({postLoading: true});
     axios.post<OrderModel>('/order.json', order)
-      .then(response => {
-        console.log(response);
+      .then(_ => {
         this.setState({postLoading: false});
-      }, (errors) => {
-        console.log(errors);
+      }, _ => {
         this.setState({postLoading: false});
       });
   }
@@ -155,6 +152,7 @@ class BurgerBuilder extends Component<{}, stateTypes> {
       .reduce((total, current) => total += current, 0);
     this.setState({purchasable: sum > 0});
   }
+
 }
 
-export default BurgerBuilder;
+export default WithErrorHandler(BurgerBuilder, axios);
