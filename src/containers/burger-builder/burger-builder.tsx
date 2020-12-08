@@ -14,7 +14,7 @@ import WithErrorHandler from "../../hoc/with-error-handler/with-error-handler";
 type stateTypes = {
 
   //amount of ingredients
-  ingredients: { [key in BurgerIngredientModel]?: number },
+  ingredients: { [key in BurgerIngredientModel]?: number } | null,
 
   //total price base on coefficient on ingredients type
   totalPrice: number,
@@ -28,6 +28,13 @@ type stateTypes = {
   //loading for post order summary to firebase
   postLoading: boolean,
 
+  //loading for get ingredients from firebase
+  getLoading: boolean,
+
+  //get error messages
+  getErrors: string | null;
+
+
 };
 
 const INGREDIENT_PRICE: { [key in BurgerIngredientModel]?: number } = {
@@ -40,33 +47,50 @@ const INGREDIENT_PRICE: { [key in BurgerIngredientModel]?: number } = {
 class BurgerBuilder extends Component<{}, stateTypes> {
 
   state = {
-    ingredients: {
-      cheese: 0,
-      meat: 0,
-      salad: 0,
-      bacon: 0,
-      seeds1: 0,
-      seeds2: 0,
-      'bread-top': 0,
-      'bread-bottom': 0,
-    },
+    ingredients: null,
     totalPrice: 10,
     purchasable: false,
     purchasing: false,
     postLoading: false,
+    getLoading: true,
+    getErrors: null,
   }
 
   //==============================
   // Hooks
   //==============================
   render() {
-    let order_summary = this.state.postLoading ?
-      <Spinner/> :
-      <OrderSummary
-        totalPrice={this.state.totalPrice}
-        onCancel={this.onCancelPurchasing}
-        onContinue={this.onContinuePurchase}
-        ingredients={this.state.ingredients}/>
+    let order_summary = null;
+    let burger = null;
+
+    if (this.state.getLoading) {
+      burger = <Spinner/>
+    }
+    //loading finished
+    else {
+      if (this.state.getErrors) {
+        burger = <p>{this.state.getErrors}</p>
+      } else {
+        burger = <Aux>
+          <Burger ingredients={this.state.ingredients!}/>
+          <BuildControls
+            totalPrice={this.state.totalPrice}
+            disabled={this.state.ingredients!}
+            purchasable={this.state.purchasable}
+            onOrder={this.onPurchasing}
+            addIngredient={this.addIngredients}
+            removeIngredients={this.removeIngredients}/>
+        </Aux>
+        order_summary = this.state.postLoading ?
+          <Spinner/> :
+          <OrderSummary
+            totalPrice={this.state.totalPrice}
+            onCancel={this.onCancelPurchasing}
+            onContinue={this.onContinuePurchase}
+            ingredients={this.state.ingredients!}/>;
+      }
+    }
+
 
     return (
       <Aux>
@@ -75,26 +99,25 @@ class BurgerBuilder extends Component<{}, stateTypes> {
           show={this.state.purchasing}>
           {order_summary}
         </Modal>
-        <Burger ingredients={this.state.ingredients}/>
-        <BuildControls
-          totalPrice={this.state.totalPrice}
-          disabled={this.state.ingredients}
-          purchasable={this.state.purchasable}
-          onOrder={this.onPurchasing}
-          addIngredient={this.addIngredients}
-          removeIngredients={this.removeIngredients}/>
+        {burger}
       </Aux>
     );
+  }
+
+  componentDidMount() {
+    this.fetchIngredients();
   }
 
   //==============================
   // Handlers
   //==============================
   addIngredients = (type: BurgerIngredientModel) => {
-    const newIngredientsCount = this.state.ingredients[type] + 1;
-    const newIngredients = {...this.state.ingredients, [type]: newIngredientsCount,};
+    const newIngredientsCount = this.state.ingredients![type] + 1;
+    const newIngredients = {
+      ...(this.state.ingredients! as { [k in BurgerIngredientModel]: number }),
+      [type]: newIngredientsCount,
+    };
     const newTotalPrice = this.state.totalPrice + INGREDIENT_PRICE[type]!;
-
     this.setState({
       ingredients: newIngredients,
       totalPrice: newTotalPrice,
@@ -104,8 +127,11 @@ class BurgerBuilder extends Component<{}, stateTypes> {
   }
 
   removeIngredients = (type: BurgerIngredientModel) => {
-    const newIngredientsCount = this.state.ingredients[type] - 1;
-    const newIngredients = {...this.state.ingredients, [type]: newIngredientsCount,};
+    const newIngredientsCount = this.state.ingredients![type] - 1;
+    const newIngredients = {
+      ...(this.state.ingredients! as { [k in BurgerIngredientModel]: number }),
+      [type]: newIngredientsCount,
+    };
     const newTotalPrice = this.state.totalPrice - INGREDIENT_PRICE[type]!;
 
     this.setState({
@@ -124,26 +150,23 @@ class BurgerBuilder extends Component<{}, stateTypes> {
     this.setState({purchasing: false});
   }
 
-  onContinuePurchase = () => {
+  onContinuePurchase = async () => {
     const order: OrderModel = {
       deliveryMethod: 'fastest',
       price: this.state.totalPrice,
-      ingredients: this.state.ingredients,
+      ingredients: this.state.ingredients!,
       customer: {
         name: 'moodi',
         email: 'moodi@moodi.com',
-        address: {
-          country: 'Iran',
-        }
+        address: {country: 'Iran',}
       }
     }
-    this.setState({postLoading: true});
-    axios.post<OrderModel>('/order.json', order)
-      .then(_ => {
-        this.setState({postLoading: false});
-      }, _ => {
-        this.setState({postLoading: false});
-      });
+    try {
+      await axios.post<OrderModel>('/order.json', order);
+      this.setState({postLoading: false, purchasing: false});
+    } catch (e) {
+      this.setState({postLoading: false, purchasing: false});
+    }
   }
 
   updatePurchase(ingredients: { [key in BurgerIngredientModel]: number }) {
@@ -151,6 +174,19 @@ class BurgerBuilder extends Component<{}, stateTypes> {
       .map(item => ingredients[item])
       .reduce((total, current) => total += current, 0);
     this.setState({purchasable: sum > 0});
+  }
+
+  fetchIngredients = async () => {
+    try {
+      const get = await axios.get<{ [K in BurgerIngredientModel]: number }>('https://udemy-burger-builder-a89d7.firebaseio.com/ingredients.json');
+      this.setState({
+        ingredients: {...(this.state.ingredients! as { [k in BurgerIngredientModel]: number }), ...get.data},
+        getLoading: false,
+      });
+    } catch (e) {
+      this.setState({getErrors: 'There is issue on fetching data, please try again later', getLoading: false,});
+    }
+
   }
 
 }

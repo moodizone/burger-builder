@@ -5,46 +5,57 @@ import Modal from "../../components/UI/modal/modal";
 import {AxiosInstance} from "axios";
 
 type stateType = {
-  show: boolean;
-  errors: string | null;
+  errors: any;
 }
 
 const WithErrorHandler = (WrappedComponent: any, axios: AxiosInstance) => {
   return class extends Component<any, stateType> {
     state = {
-      show: false,
       errors: null,
     }
 
-    componentDidMount() {
-      axios.interceptors.request.use(res => {
-        // this.setState({errors: null});
+    //for ejecting unused interceptors (-1 as invalid)
+    interceptor = {
+      request: -1,
+      response: -1,
+    }
+
+    //=======================================
+    // Hooks
+    //=======================================
+    componentWillMount() {
+      this.interceptor.request = axios.interceptors.request.use(res => {
+        this.setState({errors: null});
         return res;
       });
 
-      axios.interceptors.response.use(res => res, error => {
-        // this.setState({errors: error});
-        this.setState({show: true});
+      this.interceptor.response = axios.interceptors.response.use(res => res, error => {
+        this.setState({errors: error});
       });
+    }
+
+    componentWillUnmount() {
+      axios.interceptors.request.eject(this.interceptor.request);
+      axios.interceptors.response.eject(this.interceptor.response);
     }
 
     render() {
       return (
         <Aux>
-          <Modal show={this.state.show} hide={this.hideModal}>
-            <p>something went wrong!</p>
+          <Modal show={!!this.state.errors} hide={this.errorHandlerConfirmed}>
+            <p>something went wrong</p>
           </Modal>
           <WrappedComponent {...this.props}/>
         </Aux>
       );
     }
 
-    showModal = () => {
-      this.setState({show: true});
-    }
 
-    hideModal = () => {
-      this.setState({show: false});
+    //=======================================
+    // Handler
+    //=======================================
+    errorHandlerConfirmed = () => {
+      this.setState({errors: null});
     }
   }
 };
